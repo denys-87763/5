@@ -1,0 +1,39 @@
+#Шиян 2К-22 
+require 'json'
+def read_users(file_path)
+  begin
+    unless File.exist?(file_path)
+      puts "Помилка: Файл '#{file_path}' не знайдено!"
+      return
+    end
+    file_content = File.read(file_path)
+    users = JSON.parse(file_content)
+    unless users.is_a?(Array)
+      puts "Помилка: JSON має містити масив користувачів!"
+      return
+    end
+    if users.empty?
+      puts "Немає користувачів у файлі!"
+      return
+    end
+    puts "\nСписок користувачів:"
+    users.each do |user|
+      name = user['name'] || 'Невідомо'
+      age = user['age'] || 'Невідомо'
+      puts "Ім'я: #{name}, Вік: #{age}"
+    end
+    valid_ages = users.select { |user| user['age'].is_a?(Numeric) }.map { |user| user['age'] }
+    if valid_ages.empty?
+      puts "\nНемає даних про вік для обчислення середнього!"
+    else
+      average_age = valid_ages.sum.to_f / valid_ages.length
+      puts "\nСередній вік: #{average_age.round(2)}"
+    end
+
+  rescue JSON::ParserError
+    puts "Помилка: Некоректний формат JSON у файлі '#{file_path}'!"
+  rescue StandardError => e
+    puts "Помилка: #{e.message}"
+  end
+end
+read_users('users.json')
